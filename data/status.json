@@ -1,0 +1,30 @@
+{
+  "run_time": "2026-11-19T12:00:00Z",
+  "first_run_date": "2026-11-13",
+  "days_with_success": 7,
+  "open": 8,
+  "new_today": 0,
+  "removed_today": 0,
+  "sources": [
+    {
+      "name": "figma",
+      "ok": true,
+      "count": 2
+    },
+    {
+      "name": "cloudflare",
+      "ok": true,
+      "count": 2
+    },
+    {
+      "name": "duolingo",
+      "ok": true,
+      "count": 2
+    },
+    {
+      "name": "spotify",
+      "ok": true,
+      "count": 2
+    }
+  ]
+}

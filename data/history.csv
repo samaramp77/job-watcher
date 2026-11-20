@@ -1,0 +1,12 @@
+posting_id,source,source_id,employer,title,location,department,posted_date,url,in_role,first_run,first_seen,last_seen,status,removed_date
+cloudflare:2001,cloudflare,2001,Cloudflare,Product Designer,"Austin, TX",Design,2026-11-13,https://example.com/jobs/2001,false,true,2026-11-13,2026-11-19,open,
+cloudflare:2002,cloudflare,2002,Cloudflare,Operations Analyst,Remote,Operations,2026-11-13,https://example.com/jobs/2002,true,true,2026-11-13,2026-11-17,removed,2026-11-18
+cloudflare:2003,cloudflare,2003,Cloudflare,Software Engineer,"Austin, TX",Engineering,2026-11-16,https://example.com/jobs/2003,false,false,2026-11-16,2026-11-19,open,
+duolingo:4001,duolingo,4001,Duolingo,Senior Data Scientist,"Pittsburgh, PA",Data,2026-11-13,https://example.com/jobs/4001,true,true,2026-11-13,2026-11-19,open,
+duolingo:4002,duolingo,4002,Duolingo,Marketing Manager,"New York, NY",Marketing,2026-11-14,https://example.com/jobs/4002,false,false,2026-11-14,2026-11-16,removed,2026-11-17
+duolingo:4003,duolingo,4003,Duolingo,Research Analyst,"Pittsburgh, PA",Research,2026-11-18,https://example.com/jobs/4003,true,false,2026-11-18,2026-11-19,open,
+figma:1001,figma,1001,Figma,"Data Analyst, Growth","New York, NY",Data,2026-11-13,https://example.com/jobs/1001,true,true,2026-11-13,2026-11-19,open,
+figma:1002,figma,1002,Figma,Senior Product Designer,"New York, NY",Design,2026-11-13,https://example.com/jobs/1002,false,true,2026-11-13,2026-11-15,removed,2026-11-16
+figma:1003,figma,1003,Figma,Product Analyst,Remote,Product,2026-11-15,https://example.com/jobs/1003,true,false,2026-11-15,2026-11-19,open,
+spotify:3001,spotify,3001,Spotify,Senior Data Engineer,"Stockholm, Sweden",Data,2026-11-13,https://example.com/jobs/3001,true,true,2026-11-13,2026-11-19,open,
+spotify:3002,spotify,3002,Spotify,Content Designer,"London, UK",Design,2026-11-16,https://example.com/jobs/3002,false,false,2026-11-16,2026-11-19,open,
