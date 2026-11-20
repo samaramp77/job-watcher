@@ -1,0 +1,30 @@
+[
+  {
+    "name": "figma",
+    "employer": "Figma",
+    "ats": "greenhouse",
+    "board": "figma",
+    "url": "https://boards-api.greenhouse.io/v1/boards/figma/jobs?content=true"
+  },
+  {
+    "name": "cloudflare",
+    "employer": "Cloudflare",
+    "ats": "greenhouse",
+    "board": "cloudflare",
+    "url": "https://boards-api.greenhouse.io/v1/boards/cloudflare/jobs?content=true"
+  },
+  {
+    "name": "duolingo",
+    "employer": "Duolingo",
+    "ats": "greenhouse",
+    "board": "duolingo",
+    "url": "https://boards-api.greenhouse.io/v1/boards/duolingo/jobs?content=true"
+  },
+  {
+    "name": "spotify",
+    "employer": "Spotify",
+    "ats": "lever",
+    "board": "spotify",
+    "url": "https://api.lever.co/v0/postings/spotify?mode=json"
+  }
+]
