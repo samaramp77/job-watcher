@@ -1,0 +1,25 @@
+name: Daily job watcher
+
+on:
+  schedule:
+    - cron: "17 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch sources, rebuild data, update issue, and commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python pipeline.py run --commit --push
