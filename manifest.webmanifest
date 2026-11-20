@@ -1,0 +1,13 @@
+{
+  "name": "Job watcher",
+  "short_name": "Job watcher",
+  "description": "A daily, reproducible view of job-board changes.",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f9f7",
+  "theme_color": "#087f80",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
