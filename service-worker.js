@@ -1,4 +1,4 @@
-const CACHE = "job-watcher-v1";
+const CACHE = "job-watcher-v2";
 const APP_SHELL = ["./", "index.html", "browse.html", "market.html", "styles.css", "app.js", "manifest.webmanifest", "icon.svg", "data/status.json", "data/history.csv"];
 
 self.addEventListener("install", (event) => {
@@ -11,18 +11,22 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  const isData = new URL(event.request.url).pathname.endsWith("/data/status.json") || new URL(event.request.url).pathname.endsWith("/data/history.csv");
-  if (isData) {
+  const requestURL = new URL(event.request.url);
+  const isNetworkFirst = event.request.mode === "navigate"
+    || requestURL.pathname.endsWith("/data/status.json")
+    || requestURL.pathname.endsWith("/data/history.csv")
+    || /\.(?:html|js|css|webmanifest|svg)$/.test(requestURL.pathname);
+  if (isNetworkFirst) {
     event.respondWith(fetch(event.request).then((response) => {
       const copy = response.clone();
       caches.open(CACHE).then((cache) => cache.put(event.request, copy));
       return response;
     }).catch(() => caches.match(event.request)));
-  } else {
-    event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-      const copy = response.clone();
-      caches.open(CACHE).then((cache) => cache.put(event.request, copy));
-      return response;
-    })));
+    return;
   }
+  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
+    const copy = response.clone();
+    caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+    return response;
+  })));
 });
