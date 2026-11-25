@@ -20,6 +20,10 @@ h1 { max-width: 780px; margin-bottom: 12px; font-size: clamp(2.4rem, 6vw, 5.2rem
 h2 { margin: 7px 0 8px; font-size: clamp(1.4rem, 2.3vw, 2.1rem); line-height: 1.1; letter-spacing: -.045em; }
 h3 { margin: 4px 0 5px; font-size: 1.15rem; line-height: 1.2; }
 .hero p, .market-section > p { max-width: 650px; color: var(--muted); }
+.focus-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 19px; }
+.focus-links a { padding: 7px 12px; border: 1px solid #a9d8d4; border-radius: 99px; color: var(--teal); background: var(--teal-light); font-size: 13px; font-weight: 600; text-decoration: none; }
+.focus-links a:hover { color: white; background: var(--teal); }
+.focus-label { color: var(--muted); font-family: "DM Mono", monospace; font-size: 11px; text-transform: uppercase; letter-spacing: .07em; }
 .last-run { color: var(--muted); font-family: "DM Mono", monospace; font-size: 12px; white-space: nowrap; }
 .count-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 28px 0 44px; }
 .count-card { padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); box-shadow: var(--shadow); }

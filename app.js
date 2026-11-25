@@ -194,6 +194,9 @@ function renderMarket() {
 
 function wireBrowse() {
   fillFilters();
+  const requestedRegion = new URLSearchParams(window.location.search).get("region");
+  const regionFilter = document.querySelector("#region-filter");
+  if (requestedRegion && [...regionFilter.options].some((option) => option.value === requestedRegion)) regionFilter.value = requestedRegion;
   ["role-switch", "region-filter", "employer-filter", "location-filter", "days-filter", "title-search", "sort-order"].forEach((id) => document.querySelector(`#${id}`)?.addEventListener("input", renderBrowse));
   renderBrowse();
 }
