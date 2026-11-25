@@ -12,11 +12,13 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable
 from urllib.error import HTTPError, URLError
+from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 
@@ -157,6 +159,143 @@ def normalize_lever(payload: list[dict[str, Any]], source: dict[str, str]) -> li
     return rows
 
 
+def _date_text(value: Any) -> str:
+    text = _text(value)
+    if not text:
+        return ""
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00")).date().isoformat()
+    except ValueError:
+        for pattern in ("%b %d, %Y", "%B %d, %Y", "%m/%d/%Y"):
+            try:
+                return datetime.strptime(text, pattern).date().isoformat()
+            except ValueError:
+                continue
+    return text[:10] if re.match(r"^\d{4}-\d{2}-\d{2}", text) else ""
+
+
+def _workday_url(source: dict[str, str], external_path: Any) -> str:
+    path = _text(external_path)
+    if path.startswith("http://") or path.startswith("https://"):
+        return path
+    return f"{source['public_url'].rstrip('/')}/{path.lstrip('/')}"
+
+
+def normalize_workday(payload: dict[str, Any], source: dict[str, str]) -> list[dict[str, str | bool]]:
+    rows = []
+    for job in payload.get("jobPostings", []):
+        bullets = job.get("bulletFields") or []
+        source_id = _text(job.get("jobReqId") or (bullets[0] if bullets else ""))
+        external_path = _text(job.get("externalPath"))
+        if not source_id:
+            source_id = external_path.rsplit("_", 1)[-1]
+        title = _text(job.get("title"))
+        department = _text(job.get("department") or job.get("jobCategory") or job.get("timeType"))
+        rows.append(
+            {
+                "posting_id": f"{source['name']}:{source_id}",
+                "source": source["name"],
+                "source_id": source_id,
+                "employer": source["employer"],
+                "title": title,
+                "location": _text(job.get("locationsText") or job.get("location")),
+                "department": department,
+                "posted_date": _date_text(job.get("postedDate")),
+                "url": _workday_url(source, external_path),
+                "in_role": title_in_role(title),
+            }
+        )
+    return rows
+
+
+def _oracle_location(job: dict[str, Any]) -> str:
+    locations = [_text(job.get("PrimaryLocation"))]
+    for item in job.get("secondaryLocations") or []:
+        if isinstance(item, dict):
+            value = item.get("LocationName") or item.get("locationName") or item.get("Location")
+        else:
+            value = item
+        if _text(value):
+            locations.append(_text(value))
+    return " / ".join(dict.fromkeys(value for value in locations if value))
+
+
+def normalize_oracle(payload: dict[str, Any], source: dict[str, str]) -> list[dict[str, str | bool]]:
+    rows = []
+    items = payload.get("items") or []
+    requisitions = items[0].get("requisitionList", []) if items else []
+    for job in requisitions:
+        source_id = _text(job.get("Id"))
+        title = _text(job.get("Title"))
+        rows.append(
+            {
+                "posting_id": f"{source['name']}:{source_id}",
+                "source": source["name"],
+                "source_id": source_id,
+                "employer": source["employer"],
+                "title": title,
+                "location": _oracle_location(job),
+                "department": _text(job.get("JobFamily") or job.get("JobFunction") or job.get("Department")),
+                "posted_date": _date_text(job.get("PostedDate")),
+                "url": f"{source['public_url'].rstrip('/')}/job/{source_id}",
+                "in_role": title_in_role(title),
+            }
+        )
+    return rows
+
+
+def normalize_phenom(payload: dict[str, Any], source: dict[str, str]) -> list[dict[str, str | bool]]:
+    rows = []
+    jobs = (payload.get("refineSearch") or {}).get("data", {}).get("jobs", [])
+    for job in jobs:
+        source_id = _text(job.get("jobId") or job.get("reqId") or job.get("jobSeqNo"))
+        title = _text(job.get("title"))
+        category = job.get("category")
+        if isinstance(category, list):
+            category = " / ".join(_text(value) for value in category if _text(value))
+        rows.append(
+            {
+                "posting_id": f"{source['name']}:{source_id}",
+                "source": source["name"],
+                "source_id": source_id,
+                "employer": source["employer"],
+                "title": title,
+                "location": _text(job.get("cityStateCountry") or job.get("location") or job.get("cityState")),
+                "department": _text(job.get("department") or category),
+                "posted_date": _date_text(job.get("postedDate") or job.get("dateCreated")),
+                "url": _text(job.get("applyUrl") or job.get("externalApply")),
+                "in_role": title_in_role(title),
+            }
+        )
+    return rows
+
+
+def normalize_deloitte(payload: dict[str, Any], source: dict[str, str]) -> list[dict[str, str | bool]]:
+    rows = []
+    for job in payload.get("jobs", []):
+        source_id = _text(job.get("guid") or job.get("reqid") or job.get("django_id"))
+        title = _text(job.get("title_exact"))
+        city = _text(job.get("city_exact"))
+        state = _text(job.get("state_short_exact") or job.get("state_short"))
+        country = _text(job.get("country_exact"))
+        location = ", ".join(value for value in (city, state or country) if value)
+        rows.append(
+            {
+                "posting_id": f"{source['name']}:{source_id}",
+                "source": source["name"],
+                "source_id": source_id,
+                "employer": source["employer"],
+                "title": title,
+                "location": location,
+                "department": "",
+                "posted_date": _date_text(job.get("date_new") or job.get("date_added")),
+                "url": f"{source['public_url'].rstrip('/')}/job/{source_id}",
+                "in_role": title_in_role(title),
+            }
+        )
+    return rows
+
+
 def normalize_payload(payload: Any, source: dict[str, str]) -> list[dict[str, str | bool]]:
     if source["ats"] == "greenhouse":
         if not isinstance(payload, dict):
@@ -166,14 +305,26 @@ def normalize_payload(payload: Any, source: dict[str, str]) -> list[dict[str, st
         if not isinstance(payload, list):
             raise ValueError(f"Lever payload for {source['name']} is not a list")
         return normalize_lever(payload, source)
+    if source["ats"] == "workday":
+        if not isinstance(payload, dict):
+            raise ValueError(f"Workday payload for {source['name']} is not an object")
+        return normalize_workday(payload, source)
+    if source["ats"] == "oracle":
+        if not isinstance(payload, dict):
+            raise ValueError(f"Oracle payload for {source['name']} is not an object")
+        return normalize_oracle(payload, source)
+    if source["ats"] == "phenom":
+        if not isinstance(payload, dict):
+            raise ValueError(f"Phenom payload for {source['name']} is not an object")
+        return normalize_phenom(payload, source)
+    if source["ats"] == "deloitte-json":
+        if not isinstance(payload, dict):
+            raise ValueError(f"Deloitte payload for {source['name']} is not an object")
+        return normalize_deloitte(payload, source)
     raise ValueError(f"Unsupported ATS: {source['ats']}")
 
 
-def fetch_json(source: dict[str, str], timeout: int = 45) -> tuple[bytes, Any]:
-    request = Request(
-        source["url"],
-        headers={"Accept": "application/json", "User-Agent": "job-watcher/1.0"},
-    )
+def _request_json(request: Request, timeout: int = 45) -> tuple[bytes, Any]:
     try:
         with urlopen(request, timeout=timeout) as response:
             raw = response.read()
@@ -183,6 +334,186 @@ def fetch_json(source: dict[str, str], timeout: int = 45) -> tuple[bytes, Any]:
         return raw, json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"response was not valid JSON: {exc}") from exc
+
+
+def fetch_json(source: dict[str, str], timeout: int = 45) -> tuple[bytes, Any]:
+    request = Request(
+        source["url"],
+        headers={"Accept": "application/json", "User-Agent": "job-watcher/1.0"},
+    )
+    return _request_json(request, timeout)
+
+
+def _json_bytes(payload: Any) -> bytes:
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+
+
+def fetch_workday(source: dict[str, str], timeout: int = 45) -> tuple[bytes, Any]:
+    postings = []
+    offset = 0
+    limit = 20
+    total = None
+    while True:
+        body = {
+            "limit": limit,
+            "offset": offset,
+            "searchText": source.get("search_text", ""),
+            "appliedFacets": {},
+        }
+        request = Request(
+            source["url"],
+            data=_json_bytes(body),
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "User-Agent": "job-watcher/1.0",
+            },
+            method="POST",
+        )
+        _, page = _request_json(request, timeout)
+        if not isinstance(page, dict):
+            raise RuntimeError(f"Workday payload for {source['name']} is not an object")
+        page_jobs = page.get("jobPostings") or []
+        if total is None:
+            total = int(page.get("total") or 0)
+        postings.extend(page_jobs)
+        if not page_jobs or len(page_jobs) < limit or (total and offset + len(page_jobs) >= total):
+            break
+        offset += len(page_jobs)
+        if offset > 10000:
+            raise RuntimeError(f"Workday source {source['name']} needs a narrower search term")
+    payload = {"total": total or len(postings), "jobPostings": postings}
+    return _json_bytes(payload), payload
+
+
+def _oracle_request_url(source: dict[str, str], offset: int) -> str:
+    finder = f"findReqs;siteNumber={source['site']}"
+    if source.get("search_text"):
+        finder += f",keyword={source['search_text']}"
+    finder += f",limit=200,offset={offset},sortBy=POSTING_DATES_DESC"
+    query = "&".join(
+        [
+            "onlyData=true",
+            "expand=requisitionList.secondaryLocations",
+            f"finder={quote(finder, safe=';,=')}",
+        ]
+    )
+    return f"{source['url']}?{query}"
+
+
+def fetch_oracle(source: dict[str, str], timeout: int = 45) -> tuple[bytes, Any]:
+    requisitions = []
+    offset = 0
+    total = None
+    while True:
+        request = Request(
+            _oracle_request_url(source, offset),
+            headers={"Accept": "application/json", "User-Agent": "job-watcher/1.0"},
+        )
+        _, page = _request_json(request, timeout)
+        items = page.get("items") if isinstance(page, dict) else None
+        if not items:
+            break
+        first = items[0]
+        if total is None:
+            total = int(first.get("TotalJobsCount") or 0)
+        page_jobs = first.get("requisitionList") or []
+        requisitions.extend(page_jobs)
+        if not page_jobs or len(page_jobs) < 200 or (total and offset + len(page_jobs) >= total):
+            break
+        offset += len(page_jobs)
+        if offset > 10000:
+            raise RuntimeError(f"Oracle source {source['name']} needs a narrower search term")
+    payload = {"items": [{"TotalJobsCount": total or len(requisitions), "requisitionList": requisitions}]}
+    return _json_bytes(payload), payload
+
+
+def fetch_phenom(source: dict[str, str], timeout: int = 45) -> tuple[bytes, Any]:
+    jobs = []
+    start = 0
+    size = 500
+    total = None
+    while True:
+        body = {
+            "ddoKey": "refineSearch",
+            "jobs": True,
+            "from": start,
+            "size": size,
+            "sort": {"order": "desc", "field": "dateCreated"},
+        }
+        request = Request(
+            source["url"],
+            data=_json_bytes(body),
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "User-Agent": "job-watcher/1.0",
+            },
+            method="POST",
+        )
+        _, page = _request_json(request, timeout)
+        refine = page.get("refineSearch") if isinstance(page, dict) else None
+        data = refine.get("data", {}) if isinstance(refine, dict) else {}
+        page_jobs = data.get("jobs") or []
+        if total is None:
+            total = int((refine or {}).get("totalHits") or 0)
+        jobs.extend(page_jobs)
+        if not page_jobs or len(page_jobs) < size or (total and start + len(page_jobs) >= total):
+            break
+        start += len(page_jobs)
+    payload = {"refineSearch": {"totalHits": total or len(jobs), "data": {"jobs": jobs}}}
+    return _json_bytes(payload), payload
+
+
+def fetch_deloitte(source: dict[str, str], timeout: int = 45) -> tuple[bytes, Any]:
+    jobs = []
+    page_number = 1
+    total_pages = None
+    while True:
+        params = {"job_folder": source.get("job_folder", "ALL_JOBS"), "q": source.get("search_text", ""), "page": page_number}
+        request = Request(
+            f"{source['url']}?{urlencode(params)}",
+            headers={
+                "Accept": "application/json",
+                "User-Agent": "job-watcher/1.0",
+                "x-origin": source.get("origin", "jobsus.deloitte.com"),
+            },
+        )
+        for attempt in range(4):
+            try:
+                _, page = _request_json(request, timeout)
+                break
+            except RuntimeError as exc:
+                if "429" not in str(exc) or attempt == 3:
+                    raise
+                time.sleep(5 * (attempt + 1))
+        if not isinstance(page, dict):
+            raise RuntimeError(f"Deloitte payload for {source['name']} is not an object")
+        page_jobs = page.get("jobs") or []
+        pagination = page.get("pagination") or {}
+        if total_pages is None:
+            total_pages = int(pagination.get("total_pages") or 1)
+        jobs.extend(page_jobs)
+        if not page_jobs or page_number >= total_pages:
+            break
+        page_number += 1
+        time.sleep(float(source.get("page_delay", "0.75")))
+    payload = {"jobs": jobs, "pagination": {"total_pages": total_pages or 1, "total": len(jobs)}}
+    return _json_bytes(payload), payload
+
+
+def fetch_source(source: dict[str, str], timeout: int = 45) -> tuple[bytes, Any]:
+    if source["ats"] in {"greenhouse", "lever"}:
+        return fetch_json(source, timeout)
+    if source["ats"] == "workday":
+        return fetch_workday(source, timeout)
+    if source["ats"] == "oracle":
+        return fetch_oracle(source, timeout)
+    if source["ats"] == "phenom":
+        return fetch_phenom(source, timeout)
+    if source["ats"] == "deloitte-json":
+        return fetch_deloitte(source, timeout)
+    raise ValueError(f"Unsupported ATS: {source['ats']}")
 
 
 def write_gzip(path: Path, raw: bytes) -> None:
@@ -448,7 +779,7 @@ def fetch_sources(run_date: date, raw_dir: Path, sources: list[dict[str, str]]) 
     for source in sources:
         result: dict[str, Any] = {"name": source["name"], "ok": False, "count": 0}
         try:
-            raw, payload = fetch_json(source)
+            raw, payload = fetch_source(source)
             # Validate before writing: a malformed response is a failed source
             # and must not leave a misleading raw file behind.
             rows = normalize_payload(payload, source)

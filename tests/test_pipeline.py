@@ -20,6 +20,36 @@ LEVER = {
     "url": "https://example.test/lever",
 }
 
+WORKDAY = {
+    "name": "workday-demo",
+    "employer": "Workday Demo",
+    "ats": "workday",
+    "site": "Demo",
+    "public_url": "https://demo.wd5.myworkdayjobs.com/en-US/Demo",
+    "url": "https://demo.wd5.myworkdayjobs.com/wday/cxs/demo/Demo/jobs",
+}
+ORACLE = {
+    "name": "oracle-demo",
+    "employer": "Oracle Demo",
+    "ats": "oracle",
+    "site": "CX",
+    "public_url": "https://demo.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX",
+    "url": "https://demo.fa.oraclecloud.com/hcmRestApi/resources/latest/recruitingCEJobRequisitions",
+}
+PHENOM = {
+    "name": "phenom-demo",
+    "employer": "Phenom Demo",
+    "ats": "phenom",
+    "url": "https://demo.example/widgets",
+}
+DELOITTE = {
+    "name": "deloitte-demo",
+    "employer": "Deloitte Demo",
+    "ats": "deloitte-json",
+    "public_url": "https://jobs.example.com",
+    "url": "https://api.example.com/search",
+}
+
 
 def write_raw(raw_root, day, source, payload):
     path = raw_root / day / f"{source['name']}.json.gz"
@@ -78,6 +108,101 @@ def test_lever_conversion_to_common_columns():
     assert rows[0]["department"] == "Design"
     assert rows[0]["posted_date"] == "2026-01-01"
     assert rows[0]["in_role"] is False
+
+
+def test_workday_conversion_to_common_columns():
+    rows = pipeline.normalize_workday(
+        {
+            "jobPostings": [
+                {
+                    "title": "Finance Manager",
+                    "externalPath": "/job/Austin-TX/Finance-Manager_R123",
+                    "locationsText": "Austin, Texas",
+                    "bulletFields": ["R123"],
+                    "postedDate": "2026-01-02",
+                }
+            ]
+        },
+        WORKDAY,
+    )
+    assert rows[0]["posting_id"] == "workday-demo:R123"
+    assert rows[0]["location"] == "Austin, Texas"
+    assert rows[0]["posted_date"] == "2026-01-02"
+    assert rows[0]["url"].endswith("/job/Austin-TX/Finance-Manager_R123")
+    assert rows[0]["in_role"] is True
+
+
+def test_oracle_conversion_to_common_columns():
+    rows = pipeline.normalize_oracle(
+        {
+            "items": [
+                {
+                    "requisitionList": [
+                        {
+                            "Id": "9001",
+                            "Title": "Financial Planning Analyst",
+                            "PostedDate": "2026-01-03",
+                            "PrimaryLocation": "Dallas, Texas",
+                            "JobFamily": "Finance",
+                            "secondaryLocations": [{"LocationName": "Remote"}],
+                        }
+                    ]
+                }
+            ]
+        },
+        ORACLE,
+    )
+    assert rows[0]["posting_id"] == "oracle-demo:9001"
+    assert rows[0]["location"] == "Dallas, Texas / Remote"
+    assert rows[0]["department"] == "Finance"
+    assert rows[0]["posted_date"] == "2026-01-03"
+
+
+def test_phenom_conversion_to_common_columns():
+    rows = pipeline.normalize_phenom(
+        {
+            "refineSearch": {
+                "data": {
+                    "jobs": [
+                        {
+                            "jobId": "p-1",
+                            "title": "Strategic Finance Associate",
+                            "cityStateCountry": "Houston, TX, United States",
+                            "category": "Finance",
+                            "postedDate": "Jan 04, 2026",
+                            "applyUrl": "https://example.test/p-1",
+                        }
+                    ]
+                }
+            }
+        },
+        PHENOM,
+    )
+    assert rows[0]["posting_id"] == "phenom-demo:p-1"
+    assert rows[0]["location"] == "Houston, TX, United States"
+    assert rows[0]["posted_date"] == "2026-01-04"
+    assert rows[0]["in_role"] is True
+
+
+def test_deloitte_json_conversion_to_common_columns():
+    rows = pipeline.normalize_deloitte(
+        {
+            "jobs": [
+                {
+                    "guid": "d-1",
+                    "title_exact": "Corporate Finance Consultant",
+                    "city_exact": "Dallas",
+                    "state_short_exact": "TX",
+                    "date_new": "2026-01-05T10:00:00Z",
+                }
+            ]
+        },
+        DELOITTE,
+    )
+    assert rows[0]["posting_id"] == "deloitte-demo:d-1"
+    assert rows[0]["location"] == "Dallas, TX"
+    assert rows[0]["posted_date"] == "2026-01-05"
+    assert rows[0]["url"] == "https://jobs.example.com/job/d-1"
 
 
 def test_title_rule_marks_corporate_finance_roles_only():

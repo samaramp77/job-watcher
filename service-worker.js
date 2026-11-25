@@ -1,4 +1,4 @@
-const CACHE = "job-watcher-v2";
+const CACHE = "job-watcher-v3";
 const APP_SHELL = ["./", "index.html", "browse.html", "market.html", "styles.css", "app.js", "manifest.webmanifest", "icon.svg", "data/status.json", "data/history.csv"];
 
 self.addEventListener("install", (event) => {

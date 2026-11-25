@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/samaramp77/job-watcher/actions/workflows/tests.yml/badge.svg)](https://github.com/samaramp77/job-watcher/actions/workflows/tests.yml)
 
-Corporate Finance Job Watcher is a reproducible daily monitor for public employer job boards. It watches corporate-finance and FP&A opportunities across fintech and technology employers, keeps every posting returned by each board, compares daily snapshots, and publishes the result to GitHub Pages. The Browse page defaults to U.S. jobs and has one-click Arkansas and Texas views; global postings remain in the archive and are available through **All regions**.
+Corporate Finance Job Watcher is a reproducible daily monitor for public employer job boards. It watches corporate-finance and FP&A opportunities across fintech, technology, transportation, retail, professional services, and financial-services employers, keeps every posting returned by each board, compares daily snapshots, and publishes the result to GitHub Pages. The Browse page defaults to U.S. jobs and has one-click Arkansas and Texas views; global postings remain in the archive and are available through **All regions**.
 
 Repository: https://github.com/samaramp77/job-watcher  
 Live site: https://samaramp77.github.io/job-watcher/
@@ -11,7 +11,7 @@ The role rule is title-only. A posting is `in_role=true` when its title contains
 
 ## Sources
 
-Every source is a no-login public JSON endpoint provided by the employer's applicant-tracking system. The pipeline never reads a job-board HTML page. The source catalog contains 16 employers, which is above the required minimum of 15.
+Every source is a no-login public JSON endpoint provided by the employer's applicant-tracking system or public career-search service. The pipeline never reads a job-board HTML page. The source catalog contains 26 employers, which is above the required minimum of 15.
 
 | Source | Employer | ATS | Raw format | Endpoint |
 | --- | --- | --- | --- | --- |
@@ -31,8 +31,18 @@ Every source is a no-login public JSON endpoint provided by the employer's appli
 | `asana` | Asana | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/asana/jobs?content=true` |
 | `lyft` | Lyft | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/lyft/jobs?content=true` |
 | `wealthfront` | Wealthfront | Lever | JSON | `api.lever.co/v0/postings/wealthfront?mode=json` |
+| `walmart` | Walmart | Workday CXS | JSON POST | `walmart.wd504.myworkdayjobs.com/wday/cxs/walmart/WalmartExternal/jobs` |
+| `tyson` | Tyson Foods | Workday CXS | JSON POST | `tysonfoods.wd5.myworkdayjobs.com/wday/cxs/tysonfoods/TSN/jobs` |
+| `jbhunt` | J.B. Hunt | Workday CXS | JSON POST | `jbhunt.wd501.myworkdayjobs.com/wday/cxs/jbhunt/Careers/jobs` |
+| `southwest` | Southwest Airlines | Phenom | JSON POST | `careers.southwestair.com/widgets` |
+| `dell` | Dell Technologies | Oracle Recruiting Cloud | JSON | `enterpriseplatform.dell.com/hcmRestApi/resources/latest/recruitingCEJobRequisitions` |
+| `usaa` | USAA | Workday CXS | JSON POST | `usaa.wd1.myworkdayjobs.com/wday/cxs/usaa/USAAJOBSWD/jobs` |
+| `texasinstruments` | Texas Instruments | Oracle Recruiting Cloud | JSON | `edbz.fa.us2.oraclecloud.com/hcmRestApi/resources/latest/recruitingCEJobRequisitions` |
+| `deloitte` | Deloitte | Deloitte public JSON search | JSON | `prod-search-api.jobsyn.org/api/v1/solr/search` |
+| `pwc` | PwC | Phenom | JSON POST | `jobs-us.pwc.com/widgets` |
+| `jpmorgan` | JPMorgan Chase | Oracle Recruiting Cloud | JSON | `jpmc.fa.oraclecloud.com/hcmRestApi/resources/latest/recruitingCEJobRequisitions` |
 
-The catalog was checked during setup and these boards were below 5,000 postings, so no search term was necessary. If a board later grows beyond 5,000, its catalog URL must be changed to include a role search term and this section must document that term.
+The larger boards use a search term in the public JSON request: Walmart uses `corporate finance`, Deloitte uses `finance analyst`, and JPMorgan Chase uses `finance`. Workday, Oracle, and Phenom sources are paged through their JSON responses; the raw archive stores the combined JSON payload used for that day. The Deloitte feed is rate-limited between pages to keep the scheduled request polite. American Airlines, AT&T, Charles Schwab, ExxonMobil, EY, and KPMG were investigated but left out because their current public boards did not provide a compliant no-login JSON listing feed; adding them would require reading HTML, which this project specifically forbids.
 
 ## Pipeline and replay
 
@@ -85,9 +95,9 @@ All calculations on the site happen in the browser from `data/history.csv` and `
 - `.github/workflows/tests.yml` runs pytest on every push and pull request.
 - `.github/workflows/daily.yml` runs the daily fetch/build/Issue/commit job on schedule and supports manual runs.
 - `.github/workflows/pages.yml` deploys the root static site to GitHub Pages.
-- `config/sources.json` lists every employer, ATS, and JSON endpoint.
-- `pipeline.py` fetches sources, converts ATS payloads, classifies titles, rebuilds history/status, updates Issues, and commits daily data.
-- `tests/test_pipeline.py` covers Greenhouse and Lever conversion, the corporate-finance title rule, first-run semantics, last-seen updates, removals, reopenings, and status counts.
+- `config/sources.json` lists every employer, ATS, JSON endpoint, public application base, and any documented search term.
+- `pipeline.py` fetches Greenhouse, Lever, Workday, Oracle, Phenom, and Deloitte JSON payloads, converts them to common rows, classifies titles, rebuilds history/status, updates Issues, and commits daily data.
+- `tests/test_pipeline.py` covers every source adapter, the corporate-finance title rule, first-run semantics, last-seen updates, removals, reopenings, and status counts.
 - `scripts/seed_demo.py` creates a deterministic seven-day fixture for local site preview; scheduled runs use live endpoints.
 - `data/raw/` stores compressed JSON snapshots by UTC date and source.
 - `data/history.csv` is the derived one-row-per-posting history.

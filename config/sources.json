@@ -110,5 +110,88 @@
     "ats": "lever",
     "board": "wealthfront",
     "url": "https://api.lever.co/v0/postings/wealthfront?mode=json"
+  },
+  {
+    "name": "walmart",
+    "employer": "Walmart",
+    "ats": "workday",
+    "site": "WalmartExternal",
+    "search_text": "corporate finance",
+    "public_url": "https://walmart.wd504.myworkdayjobs.com/en-US/WalmartExternal",
+    "url": "https://walmart.wd504.myworkdayjobs.com/wday/cxs/walmart/WalmartExternal/jobs"
+  },
+  {
+    "name": "tyson",
+    "employer": "Tyson Foods",
+    "ats": "workday",
+    "site": "TSN",
+    "public_url": "https://tysonfoods.wd5.myworkdayjobs.com/en-US/TSN",
+    "url": "https://tysonfoods.wd5.myworkdayjobs.com/wday/cxs/tysonfoods/TSN/jobs"
+  },
+  {
+    "name": "jbhunt",
+    "employer": "J.B. Hunt",
+    "ats": "workday",
+    "site": "Careers",
+    "public_url": "https://jbhunt.wd501.myworkdayjobs.com/en-US/Careers",
+    "url": "https://jbhunt.wd501.myworkdayjobs.com/wday/cxs/jbhunt/Careers/jobs"
+  },
+  {
+    "name": "southwest",
+    "employer": "Southwest Airlines",
+    "ats": "phenom",
+    "public_url": "https://careers.southwestair.com/us/en",
+    "url": "https://careers.southwestair.com/widgets"
+  },
+  {
+    "name": "dell",
+    "employer": "Dell Technologies",
+    "ats": "oracle",
+    "site": "careers",
+    "public_url": "https://enterpriseplatform.dell.com/hcmUI/CandidateExperience/en/sites/careers",
+    "url": "https://enterpriseplatform.dell.com/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
+  },
+  {
+    "name": "usaa",
+    "employer": "USAA",
+    "ats": "workday",
+    "site": "USAAJOBSWD",
+    "public_url": "https://usaa.wd1.myworkdayjobs.com/en-US/USAAJOBSWD",
+    "url": "https://usaa.wd1.myworkdayjobs.com/wday/cxs/usaa/USAAJOBSWD/jobs"
+  },
+  {
+    "name": "texasinstruments",
+    "employer": "Texas Instruments",
+    "ats": "oracle",
+    "site": "CX",
+    "public_url": "https://careers.ti.com/en/sites/CX",
+    "url": "https://edbz.fa.us2.oraclecloud.com/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
+  },
+  {
+    "name": "deloitte",
+    "employer": "Deloitte",
+    "ats": "deloitte-json",
+    "job_folder": "ALL_JOBS",
+    "origin": "jobsus.deloitte.com",
+    "search_text": "finance analyst",
+    "page_delay": "0.75",
+    "public_url": "https://jobsus.deloitte.com",
+    "url": "https://prod-search-api.jobsyn.org/api/v1/solr/search"
+  },
+  {
+    "name": "pwc",
+    "employer": "PwC",
+    "ats": "phenom",
+    "public_url": "https://jobs-us.pwc.com/us/en",
+    "url": "https://jobs-us.pwc.com/widgets"
+  },
+  {
+    "name": "jpmorgan",
+    "employer": "JPMorgan Chase",
+    "ats": "oracle",
+    "site": "CX_1001",
+    "search_text": "finance",
+    "public_url": "https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001",
+    "url": "https://jpmc.fa.oraclecloud.com/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
   }
 ]
