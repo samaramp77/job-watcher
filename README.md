@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/samaramp77/job-watcher/actions/workflows/tests.yml/badge.svg)](https://github.com/samaramp77/job-watcher/actions/workflows/tests.yml)
 
-Corporate Finance Job Watcher is a reproducible daily monitor for public employer job boards. It watches corporate-finance and FP&A opportunities across fintech and technology employers, keeps every posting returned by each board, compares daily snapshots, and publishes the result to GitHub Pages.
+Corporate Finance Job Watcher is a reproducible daily monitor for public employer job boards. It watches corporate-finance and FP&A opportunities across fintech and technology employers, keeps every posting returned by each board, compares daily snapshots, and publishes the result to GitHub Pages. The Browse page defaults to U.S. jobs and has one-click Arkansas and Texas views; global postings remain in the archive and are available through **All regions**.
 
 Repository: https://github.com/samaramp77/job-watcher  
 Live site: https://samaramp77.github.io/job-watcher/
@@ -75,7 +75,7 @@ Each daily Issue is titled with the UTC date and lists new and removed postings 
 ## Site
 
 - `index.html` is Today: the latest run time, all source statuses, the four status counts, and new/removed posting lists.
-- `browse.html` is Browse: role/all switch, employer/location/days-open filters, title search, first-seen sort, application links, and a browser-local starred shortlist.
+- `browse.html` is Browse: role/all switch, U.S./Arkansas/Texas region focus, employer/location/days-open filters, title search, first-seen sort, application links, and a browser-local starred shortlist.
 - `market.html` is Market: six history-derived findings and charts for new postings per day, removed postings per day, open postings by employer, median days open, share removed within seven days, and top open locations.
 
 All calculations on the site happen in the browser from `data/history.csv` and `data/status.json`. The manifest and service worker make the site installable and cache the last loaded data for offline use. When online, data requests go to the network first and update the cache.

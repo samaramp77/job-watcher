@@ -42,6 +42,16 @@ function escapeHTML(value) {
 
 function isRole(row) { return row.in_role === "true"; }
 function isOpen(row) { return row.status === "open"; }
+const US_REGION_RE = /\b(?:u\.?s\.?a?\.?|united states|remote\s*(?:-|,)?\s*us|alabama|alaska|arizona|arkansas|california|colorado|connecticut|delaware|florida|georgia|hawaii|idaho|illinois|indiana|iowa|kansas|kentucky|louisiana|maine|maryland|massachusetts|michigan|minnesota|mississippi|missouri|montana|nebraska|nevada|new hampshire|new jersey|new mexico|new york|north carolina|north dakota|ohio|oklahoma|oregon|pennsylvania|rhode island|south carolina|south dakota|tennessee|texas|utah|vermont|virginia|washington|west virginia|wisconsin|wyoming|ak|al|ar|az|ca|co|ct|de|fl|ga|hi|ia|id|il|in|ks|ky|la|ma|md|me|mi|mn|mo|ms|mt|nc|nd|ne|nh|nj|nm|nv|ny|oh|ok|or|pa|ri|sc|sd|tn|tx|ut|va|vt|wa|wi|wv|wy)\b/i;
+const ARKANSAS_REGION_RE = /\b(?:ar|arkansas)\b|little rock|bentonville|fayetteville|springdale|rogers|jonesboro|fort smith/i;
+const TEXAS_REGION_RE = /\b(?:tx|texas)\b|austin|dallas|houston|san antonio|fort worth|plano|frisco|irving|round rock|arlington|mckinney|el paso|waco|lubbock|richardson|the woodlands/i;
+function inRegion(row, region) {
+  const location = row.location || "";
+  if (!region) return true;
+  if (region === "arkansas") return ARKANSAS_REGION_RE.test(location);
+  if (region === "texas") return TEXAS_REGION_RE.test(location);
+  return US_REGION_RE.test(location);
+}
 function today() { return (DATA.status?.run_time || "").slice(0, 10); }
 function formatDate(value) {
   if (!value) return "—";
@@ -106,6 +116,7 @@ function renderIndex() {
 
 function renderBrowse() {
   const roleOnly = document.querySelector("#role-switch")?.checked ?? true;
+  const region = document.querySelector("#region-filter")?.value || "us";
   const employer = document.querySelector("#employer-filter")?.value || "";
   const location = document.querySelector("#location-filter")?.value || "";
   const age = document.querySelector("#days-filter")?.value || "all";
@@ -113,6 +124,7 @@ function renderBrowse() {
   const sortDirection = document.querySelector("#sort-order")?.value || "newest";
   let rows = DATA.rows.filter(isOpen);
   if (roleOnly) rows = rows.filter(isRole);
+  rows = rows.filter((row) => inRegion(row, region));
   if (employer) rows = rows.filter((row) => row.employer === employer);
   if (location) rows = rows.filter((row) => row.location === location);
   if (search) rows = rows.filter((row) => row.title.toLowerCase().includes(search));
@@ -182,7 +194,7 @@ function renderMarket() {
 
 function wireBrowse() {
   fillFilters();
-  ["role-switch", "employer-filter", "location-filter", "days-filter", "title-search", "sort-order"].forEach((id) => document.querySelector(`#${id}`)?.addEventListener("input", renderBrowse));
+  ["role-switch", "region-filter", "employer-filter", "location-filter", "days-filter", "title-search", "sort-order"].forEach((id) => document.querySelector(`#${id}`)?.addEventListener("input", renderBrowse));
   renderBrowse();
 }
 
