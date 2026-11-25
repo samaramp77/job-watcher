@@ -298,7 +298,7 @@ def build_history(
 def write_history(rows: Iterable[dict[str, str]], path: Path = HISTORY_PATH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=HISTORY_COLUMNS)
+        writer = csv.DictWriter(handle, fieldnames=HISTORY_COLUMNS, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow({column: row.get(column, "") for column in HISTORY_COLUMNS})
