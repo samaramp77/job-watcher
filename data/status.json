@@ -1,8 +1,8 @@
 {
-  "run_time": "2026-11-25T05:14:27.050916Z",
+  "run_time": "2026-11-25T21:47:36.915351Z",
   "first_run_date": "2026-11-25",
   "days_with_success": 1,
-  "open": 11793,
+  "open": 11834,
   "new_today": 0,
   "removed_today": 0,
   "sources": [
@@ -14,17 +14,17 @@
     {
       "name": "brex",
       "ok": true,
-      "count": 261
+      "count": 269
     },
     {
       "name": "coinbase",
       "ok": true,
-      "count": 247
+      "count": 253
     },
     {
       "name": "robinhood",
       "ok": true,
-      "count": 162
+      "count": 161
     },
     {
       "name": "sofi",
@@ -44,32 +44,32 @@
     {
       "name": "chime",
       "ok": true,
-      "count": 78
+      "count": 77
     },
     {
       "name": "block",
       "ok": true,
-      "count": 183
+      "count": 185
     },
     {
       "name": "figma",
       "ok": true,
-      "count": 146
+      "count": 143
     },
     {
       "name": "cloudflare",
       "ok": true,
-      "count": 513
+      "count": 523
     },
     {
       "name": "duolingo",
       "ok": true,
-      "count": 53
+      "count": 54
     },
     {
       "name": "gitlab",
       "ok": true,
-      "count": 249
+      "count": 243
     },
     {
       "name": "asana",
@@ -89,37 +89,37 @@
     {
       "name": "walmart",
       "ok": true,
-      "count": 281
+      "count": 284
     },
     {
       "name": "tyson",
       "ok": true,
-      "count": 749
+      "count": 755
     },
     {
       "name": "jbhunt",
       "ok": true,
-      "count": 406
+      "count": 401
     },
     {
       "name": "southwest",
       "ok": true,
-      "count": 28
+      "count": 20
     },
     {
       "name": "dell",
       "ok": true,
-      "count": 610
+      "count": 621
     },
     {
       "name": "usaa",
       "ok": true,
-      "count": 202
+      "count": 204
     },
     {
       "name": "texasinstruments",
       "ok": true,
-      "count": 925
+      "count": 931
     },
     {
       "name": "deloitte",
@@ -129,12 +129,12 @@
     {
       "name": "pwc",
       "ok": true,
-      "count": 629
+      "count": 623
     },
     {
       "name": "jpmorgan",
       "ok": true,
-      "count": 3967
+      "count": 3972
     }
   ]
 }
