@@ -38,48 +38,76 @@ def lever_job(job_id, title, location, team, posted):
 
 def main():
     sources = pipeline.load_sources()
-    by_name = {source["name"]: source for source in sources}
     if RAW.exists():
         shutil.rmtree(RAW)
+    start = date(2026, 11, 18)
     for offset in range(7):
-        day = date(2026, 11, 13) + timedelta(days=offset)
+        day = start + timedelta(days=offset)
         stamp = day.isoformat()
-        greenhouse = {
-            "figma": [greenhouse_job("1001", "Data Analyst, Growth", "New York, NY", "Data", stamp)],
-            "cloudflare": [greenhouse_job("2001", "Product Designer", "Austin, TX", "Design", stamp)],
-            "duolingo": [greenhouse_job("4001", "Senior Data Scientist", "Pittsburgh, PA", "Data", stamp)],
-        }
-        if offset <= 2:
-            greenhouse["figma"].append(greenhouse_job("1002", "Senior Product Designer", "New York, NY", "Design", stamp))
-        if offset >= 2:
-            greenhouse["figma"].append(greenhouse_job("1003", "Product Analyst", "Remote", "Product", stamp))
-        if offset <= 4:
-            greenhouse["cloudflare"].append(greenhouse_job("2002", "Operations Analyst", "Remote", "Operations", stamp))
-        if offset >= 3:
-            greenhouse["cloudflare"].append(greenhouse_job("2003", "Software Engineer", "Austin, TX", "Engineering", stamp))
-        if 1 <= offset <= 3:
-            greenhouse["duolingo"].append(greenhouse_job("4002", "Marketing Manager", "New York, NY", "Marketing", stamp))
-        if offset >= 5:
-            greenhouse["duolingo"].append(greenhouse_job("4003", "Research Analyst", "Pittsburgh, PA", "Research", stamp))
-        for name, jobs in greenhouse.items():
-            pipeline.write_gzip(pipeline.source_file(RAW / stamp, name), json.dumps({"jobs": jobs}).encode())
-
-        lever = []
-        if offset <= 1 or offset >= 4:
-            lever.append(lever_job("3001", "Senior Data Engineer", "Stockholm, Sweden", "Data", stamp))
-        if offset >= 3:
-            lever.append(lever_job("3002", "Content Designer", "London, UK", "Design", stamp))
-        pipeline.write_gzip(pipeline.source_file(RAW / stamp, "spotify"), json.dumps(lever).encode())
+        for index, source in enumerate(sources, start=1):
+            prefix = str(index * 1000)
+            jobs = [
+                greenhouse_job(
+                    f"{prefix}1",
+                    "Senior Financial Analyst",
+                    "Chicago, IL" if index % 2 else "New York, NY",
+                    "Finance",
+                    stamp,
+                )
+            ]
+            if offset >= 2 and index % 3 == 0:
+                jobs.append(
+                    greenhouse_job(
+                        f"{prefix}2",
+                        "Strategic Finance Associate",
+                        "Remote",
+                        "Corporate Finance",
+                        stamp,
+                    )
+                )
+            if offset <= 3 and index % 4 == 0:
+                jobs.append(
+                    greenhouse_job(
+                        f"{prefix}3",
+                        "Senior Product Designer",
+                        "Austin, TX",
+                        "Design",
+                        stamp,
+                    )
+                )
+            if source["ats"] == "lever":
+                lever_jobs = [
+                    lever_job(job["id"], job["title"], job["location"]["name"], job["departments"][0]["name"], stamp)
+                    for job in jobs
+                ]
+                pipeline.write_gzip(pipeline.source_file(RAW / stamp, source["name"]), json.dumps(lever_jobs).encode())
+            else:
+                pipeline.write_gzip(
+                    pipeline.source_file(RAW / stamp, source["name"]),
+                    json.dumps({"jobs": jobs}).encode(),
+                )
 
     history = pipeline.build_history(RAW, sources)
     pipeline.write_history(history)
-    results = [{"name": source["name"], "ok": True, "count": len(pipeline.normalize_payload(pipeline.read_gzip_json(pipeline.source_file(RAW / "2026-11-19", source["name"])), source))} for source in sources]
+    results = [
+        {
+            "name": source["name"],
+            "ok": True,
+            "count": len(
+                pipeline.normalize_payload(
+                    pipeline.read_gzip_json(pipeline.source_file(RAW / "2026-11-24", source["name"])),
+                    source,
+                )
+            ),
+        }
+        for source in sources
+    ]
     status = pipeline.build_status(
         history,
         RAW,
         sources,
-        run_date=date(2026, 11, 19),
-        run_time=datetime(2026, 11, 19, 12, tzinfo=timezone.utc),
+        run_date=date(2026, 11, 24),
+        run_time=datetime(2026, 11, 24, 12, tzinfo=timezone.utc),
         source_results=results,
     )
     pipeline.write_status(status)

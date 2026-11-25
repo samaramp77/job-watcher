@@ -28,7 +28,7 @@ def write_raw(raw_root, day, source, payload):
         handle.write(json.dumps(payload).encode())
 
 
-def greenhouse_job(job_id, title="Data Analyst", location="Chicago, IL"):
+def greenhouse_job(job_id, title="Senior Financial Analyst", location="Chicago, IL"):
     return {
         "id": job_id,
         "title": title,
@@ -41,7 +41,7 @@ def greenhouse_job(job_id, title="Data Analyst", location="Chicago, IL"):
 
 def test_greenhouse_conversion_to_common_columns():
     rows = pipeline.normalize_greenhouse(
-        {"jobs": [greenhouse_job(17, "Senior Data Analyst")]}, GREENHOUSE
+        {"jobs": [greenhouse_job(17, "Senior Financial Analyst")]}, GREENHOUSE
     )
     assert rows == [
         {
@@ -49,7 +49,7 @@ def test_greenhouse_conversion_to_common_columns():
             "source": "greenhouse-demo",
             "source_id": "17",
             "employer": "Demo Co",
-            "title": "Senior Data Analyst",
+            "title": "Senior Financial Analyst",
             "location": "Chicago, IL",
             "department": "Data",
             "posted_date": "2026-01-01",
@@ -80,12 +80,20 @@ def test_lever_conversion_to_common_columns():
     assert rows[0]["in_role"] is False
 
 
-def test_title_rule_marks_data_and_adjacent_roles_only():
-    assert pipeline.title_in_role("Senior Data Scientist") is True
-    assert pipeline.title_in_role("Product Analyst") is True
-    assert pipeline.title_in_role("Quantitative Researcher") is True
+def test_title_rule_marks_corporate_finance_roles_only():
+    assert pipeline.title_in_role("Senior Financial Analyst") is True
+    assert pipeline.title_in_role("FP&A Manager") is True
+    assert pipeline.title_in_role("Strategic Finance Associate") is True
+    assert pipeline.title_in_role("Treasury Analyst") is True
     assert pipeline.title_in_role("Senior Product Designer") is False
     assert pipeline.title_in_role("Software Engineer") is False
+
+
+def test_source_catalog_has_at_least_fifteen_public_json_feeds():
+    sources = pipeline.load_sources()
+    assert len(sources) >= 15
+    assert all(source["url"].startswith("https://") for source in sources)
+    assert {source["ats"] for source in sources} >= {"greenhouse", "lever"}
 
 
 def test_history_first_seen_last_seen_removed_and_reopened(tmp_path):

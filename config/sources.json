@@ -1,5 +1,68 @@
 [
   {
+    "name": "affirm",
+    "employer": "Affirm",
+    "ats": "greenhouse",
+    "board": "affirm",
+    "url": "https://boards-api.greenhouse.io/v1/boards/affirm/jobs?content=true"
+  },
+  {
+    "name": "brex",
+    "employer": "Brex",
+    "ats": "greenhouse",
+    "board": "brex",
+    "url": "https://boards-api.greenhouse.io/v1/boards/brex/jobs?content=true"
+  },
+  {
+    "name": "coinbase",
+    "employer": "Coinbase",
+    "ats": "greenhouse",
+    "board": "coinbase",
+    "url": "https://boards-api.greenhouse.io/v1/boards/coinbase/jobs?content=true"
+  },
+  {
+    "name": "robinhood",
+    "employer": "Robinhood",
+    "ats": "greenhouse",
+    "board": "robinhood",
+    "url": "https://boards-api.greenhouse.io/v1/boards/robinhood/jobs?content=true"
+  },
+  {
+    "name": "sofi",
+    "employer": "SoFi",
+    "ats": "greenhouse",
+    "board": "sofi",
+    "url": "https://boards-api.greenhouse.io/v1/boards/sofi/jobs?content=true"
+  },
+  {
+    "name": "stripe",
+    "employer": "Stripe",
+    "ats": "greenhouse",
+    "board": "stripe",
+    "url": "https://boards-api.greenhouse.io/v1/boards/stripe/jobs?content=true"
+  },
+  {
+    "name": "ramp",
+    "employer": "Ramp",
+    "ats": "greenhouse",
+    "board": "ramp",
+    "url": "https://boards-api.greenhouse.io/v1/boards/ramp/jobs?content=true"
+  },
+  {
+    "name": "chime",
+    "employer": "Chime",
+    "ats": "greenhouse",
+    "board": "chime",
+    "url": "https://boards-api.greenhouse.io/v1/boards/chime/jobs?content=true"
+  },
+  {
+    "name": "block",
+    "employer": "Block",
+    "ats": "greenhouse",
+    "board": "block",
+    "url": "https://boards-api.greenhouse.io/v1/boards/block/jobs?content=true"
+  },
+  {
     "name": "figma",
     "employer": "Figma",
     "ats": "greenhouse",
@@ -21,10 +84,31 @@
     "url": "https://boards-api.greenhouse.io/v1/boards/duolingo/jobs?content=true"
   },
   {
-    "name": "spotify",
-    "employer": "Spotify",
+    "name": "gitlab",
+    "employer": "GitLab",
+    "ats": "greenhouse",
+    "board": "gitlab",
+    "url": "https://boards-api.greenhouse.io/v1/boards/gitlab/jobs?content=true"
+  },
+  {
+    "name": "asana",
+    "employer": "Asana",
+    "ats": "greenhouse",
+    "board": "asana",
+    "url": "https://boards-api.greenhouse.io/v1/boards/asana/jobs?content=true"
+  },
+  {
+    "name": "lyft",
+    "employer": "Lyft",
+    "ats": "greenhouse",
+    "board": "lyft",
+    "url": "https://boards-api.greenhouse.io/v1/boards/lyft/jobs?content=true"
+  },
+  {
+    "name": "wealthfront",
+    "employer": "Wealthfront",
     "ats": "lever",
-    "board": "spotify",
-    "url": "https://api.lever.co/v0/postings/spotify?mode=json"
+    "board": "wealthfront",
+    "url": "https://api.lever.co/v0/postings/wealthfront?mode=json"
   }
 ]

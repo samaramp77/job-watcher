@@ -44,12 +44,15 @@ HISTORY_COLUMNS = [
     "removed_date",
 ]
 
-# The watched role is data and analytics work. Keeping this rule in one function
+# The watched role is corporate finance and FP&A work. Keeping this rule in one function
 # means a rule change is applied to every historical raw snapshot on rebuild.
 ROLE_RE = re.compile(
-    r"\b(?:data\s+(?:analyst|analytics|engineer|scientist)|"
-    r"(?:business\s+intelligence|product|research|operations|financial|"
-    r"marketing|insights?)\s+analyst|quantitative|economist)\b",
+    r"\b(?:corporate\s+finance|corporate\s+development|"
+    r"financial\s+analyst|finance\s+analyst|finance\s+manager|"
+    r"financial\s+planning|strategic\s+finance|revenue\s+finance|"
+    r"commercial\s+finance|finance\s+business\s+partner|"
+    r"treasury\s+(?:analyst|associate|manager)|financial\s+controller|"
+    r"fp\s*&\s*a|fpa)\b",
     re.IGNORECASE,
 )
 
@@ -73,7 +76,7 @@ def iso_day(value: date | str | None) -> str:
 
 
 def title_in_role(title: str) -> bool:
-    """Return true for data, analytics, insights, and adjacent analyst roles."""
+    """Return true for corporate finance, FP&A, and closely related titles."""
 
     return bool(ROLE_RE.search(title or ""))
 

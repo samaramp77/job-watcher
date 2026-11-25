@@ -1,64 +1,111 @@
-# Job watcher
+# Corporate Finance Job Watcher
 
-[![Tests](https://github.com/samarapendergrass/job-watcher/actions/workflows/tests.yml/badge.svg)](https://github.com/samarapendergrass/job-watcher/actions/workflows/tests.yml)
+[![Tests](https://github.com/samaramp77/job-watcher/actions/workflows/tests.yml/badge.svg)](https://github.com/samaramp77/job-watcher/actions/workflows/tests.yml)
 
-Job watcher is a small, reproducible daily monitor for public employer job boards. Each run keeps the original response from every source as a compressed raw snapshot, rebuilds the entire history from those snapshots, updates a dated GitHub Issue, and commits the data. A source failure is recorded in `data/status.json` and does not stop other sources or prevent the data commit.
+Corporate Finance Job Watcher is a reproducible daily monitor for public employer job boards. It watches corporate-finance and FP&A opportunities across fintech and technology employers, keeps every posting returned by each board, compares daily snapshots, and publishes the result to GitHub Pages.
 
-The static site reads `data/history.csv` and `data/status.json` in the browser. It is an installable offline-capable app with Today, Browse, and Market pages.
+The role rule is title-only. A posting is `in_role=true` when its title contains `corporate finance`, `corporate development`, `financial analyst`, `finance analyst`, `finance manager`, `financial planning`, `strategic finance`, `revenue finance`, `commercial finance`, `finance business partner`, `treasury analyst`, `treasury associate`, `treasury manager`, `financial controller`, `FP&A`, or `FPA` (case-insensitive). Every other posting stays in the history and can be shown with Browse's **All postings** switch.
 
 ## Sources
 
-| Source | Employer | Applicant tracking system | Public endpoint |
-| --- | --- | --- | --- |
-| `figma` | Figma | Greenhouse | Greenhouse Boards API |
-| `cloudflare` | Cloudflare | Greenhouse | Greenhouse Boards API |
-| `duolingo` | Duolingo | Greenhouse | Greenhouse Boards API |
-| `spotify` | Spotify | Lever | Lever postings API |
+Every source is a no-login public JSON endpoint provided by the employer's applicant-tracking system. The pipeline never reads a job-board HTML page. The source catalog contains 16 employers, which is above the required minimum of 15.
 
-The pipeline keeps every posting returned by each board. The role rule is deliberately title-only and is applied during every history rebuild: a title is `in_role=true` when it contains data analyst, data analytics, data engineer, data scientist, business intelligence analyst, product analyst, research analyst, operations analyst, financial analyst, marketing analyst, insights analyst, quantitative, or economist (case-insensitive). Other titles remain in history and are visible when Browse is switched to all postings.
+| Source | Employer | ATS | Raw format | Endpoint |
+| --- | --- | --- | --- | --- |
+| `affirm` | Affirm | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/affirm/jobs?content=true` |
+| `brex` | Brex | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/brex/jobs?content=true` |
+| `coinbase` | Coinbase | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/coinbase/jobs?content=true` |
+| `robinhood` | Robinhood | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/robinhood/jobs?content=true` |
+| `sofi` | SoFi | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/sofi/jobs?content=true` |
+| `stripe` | Stripe | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/stripe/jobs?content=true` |
+| `ramp` | Ramp | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/ramp/jobs?content=true` |
+| `chime` | Chime | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/chime/jobs?content=true` |
+| `block` | Block | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/block/jobs?content=true` |
+| `figma` | Figma | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/figma/jobs?content=true` |
+| `cloudflare` | Cloudflare | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/cloudflare/jobs?content=true` |
+| `duolingo` | Duolingo | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/duolingo/jobs?content=true` |
+| `gitlab` | GitLab | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/gitlab/jobs?content=true` |
+| `asana` | Asana | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/asana/jobs?content=true` |
+| `lyft` | Lyft | Greenhouse | JSON | `boards-api.greenhouse.io/v1/boards/lyft/jobs?content=true` |
+| `wealthfront` | Wealthfront | Lever | JSON | `api.lever.co/v0/postings/wealthfront?mode=json` |
 
-## Data and replay
+The catalog was checked during setup and these boards were below 5,000 postings, so no search term was necessary. If a board later grows beyond 5,000, its catalog URL must be changed to include a role search term and this section must document that term.
 
-Raw files live at `data/raw/YYYY-MM-DD/<source>.json.gz`. A raw file is present only when that source succeeded for that day. `data/history.csv` is never used as input to its own rebuild: `pipeline.py build-history` scans all raw files in date order, applies the current title rule, and writes a sorted one-row-per-posting history. This makes a rule change apply to every observed day and makes a second build reproducible.
+## Pipeline and replay
 
-The fixed history columns are `posting_id`, `source`, `source_id`, `employer`, `title`, `location`, `department`, `posted_date`, `url`, `in_role`, `first_run`, `first_seen`, `last_seen`, `status`, and `removed_date`. Dates are UTC `YYYY-MM-DD` values; `run_time` in the status file is a UTC timestamp.
+GitHub Actions runs `python pipeline.py run --commit --push` every day at 12:17 UTC. The run date is the UTC date of the run. For each source, the pipeline saves the exact JSON response compressed at `data/raw/YYYY-MM-DD/<source>.json.gz`. A failed source writes no raw file, records `ok: false`, and does not stop the other sources, history build, status write, Issue update, or commit.
 
-The latest status file records the latest run time, earliest raw date, number of successful raw dates, open count, new-today count excluding first-run postings, removed-today count, and one success/failure/count entry for every source.
-
-To rebuild from raw files:
+The raw archive is the only input to the history build. Running the command below does not call the network and reproduces `data/history.csv` from all raw files:
 
 ```bash
 python pipeline.py build-history
 ```
 
-To run the full pipeline locally without touching GitHub Issues:
+The history builder processes days in order. A posting first seen in a source's first raw file has `first_run=true`. Every observed listing updates `last_seen` and makes the posting open. An open posting is marked removed when its source has a raw file for that day and no longer lists it. If it reappears later, it becomes open again, its `removed_date` is cleared, and its original `first_seen` remains unchanged. Rows are sorted by `posting_id`.
 
-```bash
-python pipeline.py run --no-issues
-```
+Each daily Issue is titled with the UTC date and lists new and removed postings with employer, location, and an application link. The previous day's open Issue is closed. A rerun on the same date replaces that day's raw directory, rebuilds all history, and edits/reopens the existing date Issue instead of creating a second current-day Issue. The Issue is still created when there are no changes.
 
-The repository includes seven deterministic sample days generated by `python scripts/seed_demo.py`, so the site is useful before the first scheduled run. The script is only a fixture generator; scheduled runs call the live source endpoints.
+## Data definitions
+
+`data/history.csv` has one row per unique posting and these fixed columns:
+
+| Column | Meaning | Unit/format |
+| --- | --- | --- |
+| `posting_id` | Source name plus the source's own posting ID | text, `source:source_id` |
+| `source` | Catalog key for the ATS source | text |
+| `source_id` | Employer-board ID for the posting | text |
+| `employer` | Employer name from the source catalog | text |
+| `title` | Posting title returned by the board | text |
+| `location` | Location returned by the board | text |
+| `department` | Department/team returned by the board | text |
+| `posted_date` | Source-reported posting date when available | UTC `YYYY-MM-DD` or empty |
+| `url` | Direct application URL | URL text |
+| `in_role` | Whether the title matches the corporate-finance rule | `true`/`false` |
+| `first_run` | Whether the posting appeared in the source's first raw file | `true`/`false` |
+| `first_seen` | First day this posting appeared in the archive | UTC `YYYY-MM-DD` |
+| `last_seen` | Most recent day the source listed the posting | UTC `YYYY-MM-DD` |
+| `status` | Whether the posting is currently listed or removed | `open`/`removed` |
+| `removed_date` | Day the source first observed the posting missing after it was open | UTC `YYYY-MM-DD` or empty |
+
+`data/status.json` contains `run_time` (UTC timestamp), `first_run_date`, `days_with_success`, `open`, `new_today`, `removed_today`, and `sources`. Each source entry contains `name`, `ok`, `count`, and, when needed, an error message. `new_today` excludes first-run postings; `removed_today` counts postings whose current removed date is the latest run date.
 
 ## Site
 
-- `index.html` is Today: last run, source health, four status counts, and new/removed lists.
-- `browse.html` filters open postings by role, employer, location, age, and title; sorts by first seen; links to apply; and stores starred postings in browser `localStorage`.
-- `market.html` computes six reports from the history CSV in the browser: new per day, removed per day, open by employer, median days open, share removed within seven days, and top open locations.
-- `styles.css`, `app.js`, `manifest.webmanifest`, `service-worker.js`, and `icon.svg` provide the shared visual system and installable offline shell.
+- `index.html` is Today: the latest run time, all source statuses, the four status counts, and new/removed posting lists.
+- `browse.html` is Browse: role/all switch, employer/location/days-open filters, title search, first-seen sort, application links, and a browser-local starred shortlist.
+- `market.html` is Market: six history-derived findings and charts for new postings per day, removed postings per day, open postings by employer, median days open, share removed within seven days, and top open locations.
+
+All calculations on the site happen in the browser from `data/history.csv` and `data/status.json`. The manifest and service worker make the site installable and cache the last loaded data for offline use. When online, data requests go to the network first and update the cache.
 
 ## Repository files
 
 - `.github/workflows/tests.yml` runs pytest on every push and pull request.
-- `.github/workflows/daily.yml` schedules the fetch/build/issue/commit pipeline daily at 12:17 UTC and supports manual runs.
-- `.github/workflows/pages.yml` deploys the root static site to GitHub Pages from the `main` branch.
-- `config/sources.json` is the source catalog and ATS mapping.
-- `pipeline.py` contains fetching, source conversion, title classification, raw replay, history/status writing, issue management, and Git commit logic.
-- `tests/test_pipeline.py` covers both source converters, the title rule, first-run semantics, last-seen updates, removals, re-openings, and status counts.
-- `scripts/seed_demo.py` creates the checked-in seven-day demo dataset.
-- `data/raw/` contains the compressed source responses; `data/history.csv` is the derived history; `data/status.json` is the latest-run summary.
-- `pyproject.toml` defines the project and pytest discovery; `requirements-dev.txt` contains the test dependency.
-- The three HTML pages, `app.js`, `styles.css`, manifest, service worker, and icon are the GitHub Pages app.
+- `.github/workflows/daily.yml` runs the daily fetch/build/Issue/commit job on schedule and supports manual runs.
+- `.github/workflows/pages.yml` deploys the root static site to GitHub Pages.
+- `config/sources.json` lists every employer, ATS, and JSON endpoint.
+- `pipeline.py` fetches sources, converts ATS payloads, classifies titles, rebuilds history/status, updates Issues, and commits daily data.
+- `tests/test_pipeline.py` covers Greenhouse and Lever conversion, the corporate-finance title rule, first-run semantics, last-seen updates, removals, reopenings, and status counts.
+- `scripts/seed_demo.py` creates a deterministic seven-day fixture for local site preview; scheduled runs use live endpoints.
+- `data/raw/` stores compressed JSON snapshots by UTC date and source.
+- `data/history.csv` is the derived one-row-per-posting history.
+- `data/status.json` is the latest-run summary used by Today.
+- `index.html`, `browse.html`, and `market.html` are the three site pages.
+- `app.js` loads the data, filters postings, maintains the shortlist, and computes Market findings/charts.
+- `styles.css` defines the shared responsive visual system.
+- `manifest.webmanifest` declares the installable app.
+- `service-worker.js` provides the offline shell and network-first data caching.
+- `icon.svg` is the app icon.
+- `pyproject.toml` configures the Python project and pytest discovery.
+- `requirements-dev.txt` lists the test dependency.
+- `README.md` documents the sources, data definitions, rules, commands, and repository layout.
 
-## GitHub setup
+## Local commands
 
-Make the repository public, enable Pages with **GitHub Actions** as the source, and keep the default branch named `main`. The daily workflow needs the standard repository `GITHUB_TOKEN` permissions for contents and issues; those permissions are declared in the workflow. The workflow creates or updates the issue whose exact title is the UTC run date and closes the previous day's open issue. A second run on the same date replaces that date's raw directory and edits that date's issue.
+```bash
+python3 scripts/seed_demo.py
+python3 pipeline.py build-history
+python3 -m pytest -q
+python3 -m http.server 8000
+```
+
+Open `http://localhost:8000/` for the site. The public repository and live Pages URL are added after the first GitHub push.
