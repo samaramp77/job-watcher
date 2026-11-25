@@ -419,11 +419,14 @@ def update_github_issue(history: list[dict[str, str]], run_date: date) -> None:
     body = issue_body(history, run_date)
     current = next((item for item in issues if item.get("title") == today), None)
     if current:
-        _run_command(["gh", "issue", "edit", str(current["number"]), "--title", today, "--body", body])
+        _run_command(
+            ["gh", "issue", "edit", str(current["number"]), "--title", today, "--body-file", "-"],
+            input_text=body,
+        )
         if current.get("state") != "OPEN":
             _run_command(["gh", "issue", "reopen", str(current["number"])])
     else:
-        _run_command(["gh", "issue", "create", "--title", today, "--body", body])
+        _run_command(["gh", "issue", "create", "--title", today, "--body-file", "-"], input_text=body)
 
 
 def git_commit(push: bool, run_date: date) -> None:
