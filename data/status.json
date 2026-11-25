@@ -1,8 +1,8 @@
 {
-  "run_time": "2026-11-25T04:09:33.178563Z",
+  "run_time": "2026-11-25T05:14:27.050916Z",
   "first_run_date": "2026-11-25",
   "days_with_success": 1,
-  "open": 3210,
+  "open": 11793,
   "new_today": 0,
   "removed_today": 0,
   "sources": [
@@ -34,7 +34,7 @@
     {
       "name": "stripe",
       "ok": true,
-      "count": 771
+      "count": 772
     },
     {
       "name": "ramp",
@@ -69,7 +69,7 @@
     {
       "name": "gitlab",
       "ok": true,
-      "count": 250
+      "count": 249
     },
     {
       "name": "asana",
@@ -85,6 +85,56 @@
       "name": "wealthfront",
       "ok": true,
       "count": 19
+    },
+    {
+      "name": "walmart",
+      "ok": true,
+      "count": 281
+    },
+    {
+      "name": "tyson",
+      "ok": true,
+      "count": 749
+    },
+    {
+      "name": "jbhunt",
+      "ok": true,
+      "count": 406
+    },
+    {
+      "name": "southwest",
+      "ok": true,
+      "count": 28
+    },
+    {
+      "name": "dell",
+      "ok": true,
+      "count": 610
+    },
+    {
+      "name": "usaa",
+      "ok": true,
+      "count": 202
+    },
+    {
+      "name": "texasinstruments",
+      "ok": true,
+      "count": 925
+    },
+    {
+      "name": "deloitte",
+      "ok": true,
+      "count": 799
+    },
+    {
+      "name": "pwc",
+      "ok": true,
+      "count": 629
+    },
+    {
+      "name": "jpmorgan",
+      "ok": true,
+      "count": 3967
     }
   ]
 }
