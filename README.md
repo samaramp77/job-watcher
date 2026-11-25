@@ -4,6 +4,9 @@
 
 Corporate Finance Job Watcher is a reproducible daily monitor for public employer job boards. It watches corporate-finance and FP&A opportunities across fintech and technology employers, keeps every posting returned by each board, compares daily snapshots, and publishes the result to GitHub Pages.
 
+Repository: https://github.com/samaramp77/job-watcher  
+Live site: https://samaramp77.github.io/job-watcher/
+
 The role rule is title-only. A posting is `in_role=true` when its title contains `corporate finance`, `corporate development`, `financial analyst`, `finance analyst`, `finance manager`, `financial planning`, `strategic finance`, `revenue finance`, `commercial finance`, `finance business partner`, `treasury analyst`, `treasury associate`, `treasury manager`, `financial controller`, `FP&A`, or `FPA` (case-insensitive). Every other posting stays in the history and can be shown with Browse's **All postings** switch.
 
 ## Sources
@@ -108,4 +111,4 @@ python3 -m pytest -q
 python3 -m http.server 8000
 ```
 
-Open `http://localhost:8000/` for the site. The public repository and live Pages URL are added after the first GitHub push.
+Open `http://localhost:8000/` for the local site. The public repository and live Pages site are linked at the top of this README.
