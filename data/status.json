@@ -1,40 +1,40 @@
 {
-  "run_time": "2026-11-25T21:47:36.915351Z",
+  "run_time": "2026-11-26T21:41:25.631873Z",
   "first_run_date": "2026-11-25",
-  "days_with_success": 1,
-  "open": 11834,
-  "new_today": 0,
-  "removed_today": 0,
+  "days_with_success": 2,
+  "open": 11792,
+  "new_today": 97,
+  "removed_today": 139,
   "sources": [
     {
       "name": "affirm",
       "ok": true,
-      "count": 215
+      "count": 216
     },
     {
       "name": "brex",
       "ok": true,
-      "count": 269
+      "count": 270
     },
     {
       "name": "coinbase",
       "ok": true,
-      "count": 253
+      "count": 256
     },
     {
       "name": "robinhood",
       "ok": true,
-      "count": 161
+      "count": 162
     },
     {
       "name": "sofi",
       "ok": true,
-      "count": 57
+      "count": 58
     },
     {
       "name": "stripe",
       "ok": true,
-      "count": 772
+      "count": 768
     },
     {
       "name": "ramp",
@@ -49,17 +49,17 @@
     {
       "name": "block",
       "ok": true,
-      "count": 185
+      "count": 183
     },
     {
       "name": "figma",
       "ok": true,
-      "count": 143
+      "count": 141
     },
     {
       "name": "cloudflare",
       "ok": true,
-      "count": 523
+      "count": 528
     },
     {
       "name": "duolingo",
@@ -69,12 +69,12 @@
     {
       "name": "gitlab",
       "ok": true,
-      "count": 243
+      "count": 241
     },
     {
       "name": "asana",
       "ok": true,
-      "count": 110
+      "count": 107
     },
     {
       "name": "lyft",
@@ -89,12 +89,12 @@
     {
       "name": "walmart",
       "ok": true,
-      "count": 284
+      "count": 281
     },
     {
       "name": "tyson",
       "ok": true,
-      "count": 755
+      "count": 741
     },
     {
       "name": "jbhunt",
@@ -104,32 +104,32 @@
     {
       "name": "southwest",
       "ok": true,
-      "count": 20
+      "count": 19
     },
     {
       "name": "dell",
       "ok": true,
-      "count": 621
+      "count": 614
     },
     {
       "name": "usaa",
       "ok": true,
-      "count": 204
+      "count": 198
     },
     {
       "name": "texasinstruments",
       "ok": true,
-      "count": 931
+      "count": 922
     },
     {
       "name": "deloitte",
       "ok": true,
-      "count": 799
+      "count": 801
     },
     {
       "name": "pwc",
       "ok": true,
-      "count": 623
+      "count": 622
     },
     {
       "name": "jpmorgan",
